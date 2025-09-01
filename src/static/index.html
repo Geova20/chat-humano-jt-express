@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J&T Express - Chat de Atendimento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2ecc71;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            border: 1px solid #e9ecef;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .quick-action-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>J&T Express - Atendimento</h1>
+            <p>Fale diretamente com nossos atendentes especializados</p>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Online</span>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-avatar">JT</div>
+                <div class="message-content">
+                    <div>Olá! Bem-vindo ao atendimento da J&T Express! 👋</div>
+                    <div>Sou um atendente especializado e estou aqui para ajudar você com qualquer dúvida sobre suas entregas, rastreamento ou outros serviços.</div>
+                    <div class="message-time" id="welcomeTime"></div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="sendQuickMessage('Rastrear encomenda')">📦 Rastrear encomenda</button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('Problema na entrega')">🚚 Problema na entrega</button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('Alterar endereço')">📍 Alterar endereço</button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('Falar com supervisor')">👨‍💼 Falar com supervisor</button>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">JT</div>
+                <div class="message-content" style="background: white; border: 1px solid #e9ecef;">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <form class="chat-input-form" id="chatForm">
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="messageInput" 
+                    placeholder="Digite sua mensagem..."
+                    autocomplete="off"
+                >
+                <button type="submit" class="send-button" id="sendButton">
+                    Enviar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const chatForm = document.getElementById('chatForm');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Definir hora da mensagem de boas-vindas
+        document.getElementById('welcomeTime').textContent = new Date().toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Respostas automáticas do atendente
+        const responses = {
+            'rastrear': [
+                'Para rastrear sua encomenda, preciso do código de rastreamento. Você pode me informar o código que começa com JT?',
+                'Claro! Vou ajudar você a rastrear sua encomenda. Por favor, me informe o código de rastreamento.'
+            ],
+            'entrega': [
+                'Entendo sua preocupação com a entrega. Pode me contar mais detalhes sobre o problema que está enfrentando?',
+                'Vou verificar o que aconteceu com sua entrega. Você pode me informar o código de rastreamento e seu endereço?'
+            ],
+            'endereço': [
+                'Para alterar o endereço de entrega, preciso verificar se ainda é possível fazer essa alteração. Me informe o código de rastreamento, por favor.',
+                'Vou ajudar você a alterar o endereço. Primeiro, preciso do código de rastreamento da sua encomenda.'
+            ],
+            'supervisor': [
+                'Vou transferir você para um supervisor agora mesmo. Por favor, aguarde um momento.',
+                'Entendo que precisa falar com um supervisor. Vou fazer a transferência imediatamente.'
+            ],
+            'problema': [
+                'Sinto muito pelo inconveniente. Pode me explicar qual problema está enfrentando para que eu possa ajudar?',
+                'Vou resolver isso para você! Me conte mais detalhes sobre o problema.'
+            ],
+            'default': [
+                'Entendi. Vou verificar essa informação para você. Um momento, por favor.',
+                'Obrigado pela informação. Deixe-me consultar nosso sistema.',
+                'Perfeito! Vou processar sua solicitação agora.',
+                'Compreendo sua situação. Vou fazer o possível para resolver isso rapidamente.',
+                'Essa é uma ótima pergunta! Vou buscar a resposta mais precisa para você.'
+            ]
+        };
+
+        function getCurrentTime() {
+            return new Date().toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${isUser ? 'EU' : 'JT'}</div>
+                <div class="message-content">
+                    <div>${content}</div>
+                    <div class="message-time">${getCurrentTime()}</div>
+                </div>
+            `;
+            
+            // Inserir antes do indicador de digitação
+            chatMessages.insertBefore(messageDiv, typingIndicator);
+            scrollToBottom();
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'flex';
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('rastrear') || lowerMessage.includes('código') || lowerMessage.includes('jt')) {
+                return responses.rastrear[Math.floor(Math.random() * responses.rastrear.length)];
+            }
+            
+            if (lowerMessage.includes('entrega') || lowerMessage.includes('entregar') || lowerMessage.includes('receber')) {
+                return responses.entrega[Math.floor(Math.random() * responses.entrega.length)];
+            }
+            
+            if (lowerMessage.includes('endereço') || lowerMessage.includes('endereco') || lowerMessage.includes('alterar')) {
+                return responses.endereço[Math.floor(Math.random() * responses.endereço.length)];
+            }
+            
+            if (lowerMessage.includes('supervisor') || lowerMessage.includes('gerente') || lowerMessage.includes('responsável')) {
+                return responses.supervisor[Math.floor(Math.random() * responses.supervisor.length)];
+            }
+            
+            if (lowerMessage.includes('problema') || lowerMessage.includes('erro') || lowerMessage.includes('dificuldade')) {
+                return responses.problema[Math.floor(Math.random() * responses.problema.length)];
+            }
+            
+            return responses.default[Math.floor(Math.random() * responses.default.length)];
+        }
+
+        function sendMessage(message) {
+            if (!message.trim()) return;
+            
+            // Adicionar mensagem do usuário
+            addMessage(message, true);
+            
+            // Mostrar indicador de digitação
+            showTyping();
+            sendButton.disabled = true;
+            
+            // Simular tempo de resposta do atendente
+            setTimeout(() => {
+                hideTyping();
+                const response = getResponse(message);
+                addMessage(response);
+                sendButton.disabled = false;
+                messageInput.focus();
+            }, 1500 + Math.random() * 1000); // 1.5-2.5 segundos
+        }
+
+        function sendQuickMessage(message) {
+            messageInput.value = message;
+            sendMessage(message);
+            messageInput.value = '';
+        }
+
+        // Event listeners
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value;
+            sendMessage(message);
+            messageInput.value = '';
+        });
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Focar no input quando a página carregar
+        window.addEventListener('load', () => {
+            messageInput.focus();
+            scrollToBottom();
+        });
+
+        // Simular atividade do atendente
+        setInterval(() => {
+            const statusDot = document.querySelector('.status-dot');
+            statusDot.style.background = '#2ecc71';
+        }, 3000);
+    </script>
+</body>
+</html>
+
