@@ -54,9 +54,6 @@ Este repositório nasce após observar **falhas de comunicação** no atendiment
 
 ---
 
-
-## 🧭 Arquitetura
-
 ## 🧭 Arquitetura
 
 ```mermaid
@@ -67,7 +64,6 @@ flowchart LR
   F --> S["Static / (index.html)"]
   F --> D["SQLite / Postgres"]
   H["Render.com"] --- F
-
 
 ## 🗂️ Estrutura do projeto
 
