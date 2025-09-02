@@ -57,15 +57,17 @@ Este repositório nasce após observar **falhas de comunicação** no atendiment
 
 ## 🧭 Arquitetura
 
+## 🧭 Arquitetura
+
 ```mermaid
 flowchart LR
-  U[Usuário] --> B[Browser]
-  B -->|HTTP| F[Flask (Gunicorn)]
-  F --> R[/Rotas /api/chat/*/]
-  F --> S[/Static / (index.html)/]
-  F --> D[(SQLite / Postgres)]
-  H[Render.com] --- F
-```
+  U["Usuário"] --> B["Browser"]
+  B -->|HTTP| F["Flask (Gunicorn)"]
+  F --> R["Rotas /api/chat/*"]
+  F --> S["Static / (index.html)"]
+  F --> D["SQLite / Postgres"]
+  H["Render.com"] --- F
+
 
 ## 🗂️ Estrutura do projeto
 
@@ -265,7 +267,7 @@ services:
 
 ## 📄 Licença
 
-Defina a licença do projeto (ex.: MIT).
+Este projeto está licenciado sob a licença MIT — veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
