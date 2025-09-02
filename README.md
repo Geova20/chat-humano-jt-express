@@ -64,6 +64,7 @@ flowchart LR
   F --> S["Static / (index.html)"]
   F --> D["SQLite / Postgres"]
   H["Render.com"] --- F
+```
 
 ## 🗂️ Estrutura do projeto
 
